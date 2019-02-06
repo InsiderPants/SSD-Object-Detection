@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-
-# Object Detection using SSD(Single Shot Multibox Detector)
+# Object Detection using SSD512(Single Shot Multibox Detector)
 
 # Libraries
 from keras import backend as K
@@ -14,17 +12,6 @@ import cv2
 # Dependencies
 from models.keras_ssd512 import ssd_512
 from keras_loss_function.keras_ssd_loss import SSDLoss
-from keras_layers.keras_layer_AnchorBoxes import AnchorBoxes
-from keras_layers.keras_layer_DecodeDetections import DecodeDetections
-from keras_layers.keras_layer_DecodeDetectionsFast import DecodeDetectionsFast
-from keras_layers.keras_layer_L2Normalization import L2Normalization
-
-from ssd_encoder_decoder.ssd_output_decoder import decode_detections, decode_detections_fast
-
-from data_generator.object_detection_2d_data_generator import DataGenerator
-from data_generator.object_detection_2d_photometric_ops import ConvertTo3Channels
-from data_generator.object_detection_2d_geometric_ops import Resize
-from data_generator.object_detection_2d_misc_utils import apply_inverse_transforms
 
 # Defining the width and height of the image
 height = 512
@@ -85,27 +72,33 @@ input_image_path = 'inputs/images'
 output_image_path = 'outputs/images'
 
 # Function to detect objects in image
-def predict_image(input_image):
-	input_image_height, input_image_width = input_image.shape[:2]
+def detect_object(input_image, original_image):
+	original_image_height, original_image_width = original_image.shape[:2]
 	y_pred = model.predict(input_image)
 	actual_prediction = [y_pred[k][y_pred[k,:,1] > confidence_threshold] for k in range(y_pred.shape[0])]
 	for box in actual_prediction[0]:
-		x0 = box[-4] * input_image_width / width
-		y0 = box[-3] * input_image_height / height
-		x1 = box[-2] * input_image_width / width
-		y1 = box[-1] * input_image_height / height
-		label_text = '{}: {:.2f}'.format(classes[int(box[0])], box[1])
-		cv2.rectangle(input_image, (int(x0), int(y0)), (int(x1), int(y1)), (255, 0, 0), 2)
-		cv2.putText(input_image, label_text, (int(x0), int(y0)), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
-	return input_image
+		# Coordinates of diagonal points of bounding box
+		x0 = box[-4] * original_image_width / width
+		y0 = box[-3] * original_image_height / height
+		x1 = box[-2] * original_image_width / width
+		y1 = box[-1] * original_image_height / height
+		label_text = '{}: {:.2f}'.format(classes[int(box[0])], box[1])	# label text
+		cv2.rectangle(original_image, (int(x0), int(y0)), (int(x1), int(y1)), (255, 0, 0), 2)	# drwaing rectangle
+		cv2.putText(original_image, label_text, (int(x0), int(y0)), cv2.FONT_HERSHEY_DUPLEX, 1.4, (255, 255, 255), 2, cv2.LINE_AA) # putting lable
+	return original_image
 	
 
 # Detecting objects in images
 for file in os.listdir(input_image_path):
-	print('Reading', file)
-	input_image = imageio.imread(os.path.join(input_image_path, file))
+	print('Reading', file)  
+	input_image = image.load_img(os.path.join(input_image_path, file), target_size=(height, width))	#  Reading image as 512*512 size
+	input_image = image.img_to_array(input_image)	# converting to array
+	input_image = np.reshape(input_image, (1, 512, 512, 3)) #expanding dimension
+	original_image = imageio.imread(os.path.join(input_image_path, file))	# original image for box purpose
 	if input_image is not None:
-		output_image = predict_image(input_image)
-		imageio.imwrite(os.path.join(output_image_path, file), output_image[:, :, :])
+		output_image = detect_object(input_image, original_image)	# detecting objects
+		imageio.imwrite(os.path.join(output_image_path, file), output_image[:, :, :])	# savinng back images
 		
+		
+# TODO make video support also
 

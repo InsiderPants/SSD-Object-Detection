@@ -103,4 +103,4 @@ venv.bak/
 # mypy
 .mypy_cache/
 
-weights/ssd300_mAP_77.43_v2.pth
+weights/VGG_VOC0712Plus_SSD_512x512_ft_iter_160000.h5

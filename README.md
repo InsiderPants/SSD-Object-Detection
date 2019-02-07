@@ -2,7 +2,7 @@
 
 In this project, I have used SSD512 algorithm to detect objects in images and videos.<br/>
 This project use prebuild model and weights.
-<h4> For Original Model creation and training on your own datasets, please check out <a href='https://github.com/pierluigiferrari/ssd_keras'> pierluigiferrari' SSD </a> 
+<h4> For Original Model creation and training on your own datasets, please check out <a href='https://github.com/pierluigiferrari/ssd_keras'> Pierluigi Ferrari' SSD Implementation</a> 
 
 ## Overview
 SSD (Single Shot MultiBox Detector) <br/>
@@ -33,5 +33,5 @@ SSD (Single Shot MultiBox Detector) <br/>
 5. Voilà, check the ```outputs``` folder.
 
 ## References
-* Original Keras implementation of SSD by <a href='https://github.com/pierluigiferrari/ssd_keras'> pierluigiferrari </a> 
+* Original Keras implementation of SSD by <a href='https://github.com/pierluigiferrari/ssd_keras'> Pierluigi Ferrari </a> 
 * Orginal Paper <a href='https://www.cs.unc.edu/~wliu/papers/ssd.pdf'> SSD: Single Shot MultiBox Detector <a>

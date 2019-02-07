@@ -71,9 +71,19 @@ model.compile(optimizer=adam, loss=ssd_loss.compute_loss)
 input_image_path = 'inputs/images'
 output_image_path = 'outputs/images'
 
+# Paths of input and output videos
+input_video_path = 'inputs/videos'
+output_video_path = 'outputs/videos'
+
+# Transforming image size
+def transform(input_image):
+	return cv2.resize(input_image, (512, 512), interpolation = cv2.INTER_CUBIC)
+
 # Function to detect objects in image
-def detect_object(input_image, original_image):
+def detect_object(original_image):
 	original_image_height, original_image_width = original_image.shape[:2]
+	input_image = transform(original_image)
+	input_image = np.reshape(input_image, (1, 512, 512, 3))
 	y_pred = model.predict(input_image)
 	actual_prediction = [y_pred[k][y_pred[k,:,1] > confidence_threshold] for k in range(y_pred.shape[0])]
 	for box in actual_prediction[0]:
@@ -84,21 +94,28 @@ def detect_object(input_image, original_image):
 		y1 = box[-1] * original_image_height / height
 		label_text = '{}: {:.2f}'.format(classes[int(box[0])], box[1])	# label text
 		cv2.rectangle(original_image, (int(x0), int(y0)), (int(x1), int(y1)), (255, 0, 0), 2)	# drwaing rectangle
-		cv2.putText(original_image, label_text, (int(x0), int(y0)), cv2.FONT_HERSHEY_DUPLEX, 1.4, (255, 255, 255), 2, cv2.LINE_AA) # putting lable
+		cv2.putText(original_image, label_text, (int(x0), int(y0)), cv2.FONT_HERSHEY_DUPLEX, 1, (231, 237, 243), 2, cv2.LINE_AA) # putting lable
 	return original_image
 	
 
 # Detecting objects in images
 for file in os.listdir(input_image_path):
 	print('Reading', file)  
-	input_image = image.load_img(os.path.join(input_image_path, file), target_size=(height, width))	#  Reading image as 512*512 size
-	input_image = image.img_to_array(input_image)	# converting to array
-	input_image = np.reshape(input_image, (1, 512, 512, 3)) #expanding dimension
-	original_image = imageio.imread(os.path.join(input_image_path, file))	# original image for box purpose
-	if input_image is not None:
-		output_image = detect_object(input_image, original_image)	# detecting objects
+	original_image = imageio.imread(os.path.join(input_image_path, file))	# Reading image
+	if original_image is not None:
+		output_image = detect_object(original_image)	# detecting objects
 		imageio.imwrite(os.path.join(output_image_path, file), output_image[:, :, :])	# savinng back images
 		
 		
-# TODO make video support also
-
+# Detecting objects in video
+for file in os.listdir(input_video_path):
+	print('Reading', file)
+	video_reader = imageio.get_reader(os.path.join(input_video_path, file))	# Reading video
+	fps = video_reader.get_meta_data()['fps']	# gettinf fps of the image
+	video_writer = imageio.get_writer(os.path.join(output_video_path, file), fps = fps)	# Writing back output image
+	for i, frame in enumerate(video_reader):
+		output_frame = detect_object(frame)	# detecting objects frame by frame
+		video_writer.append_data(output_frame)	# appending frame to vidoe
+		print('frame ', i, 'done')
+	video_writer.close()
+	

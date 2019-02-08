@@ -119,3 +119,24 @@ for file in os.listdir(input_video_path):
 		print('frame ', i, 'done')
 	video_writer.close()
 	
+
+# This section is for realtime object detection on any video or movie or through webcam or any camera.
+# If you want to do, follow these steps
+# 1. Uncomment this part.
+# 2. Put the path of video or movie here. You can also use your webcam or other camera(if there).
+# 3. for  webcam use just put 0 in path (without quotes)
+# 4. for secondary camera, use1 in path.
+# 5. Once the video started, you can see the realtime object detection
+# 6. Press 'q' button on the keyboard to exit.
+"""
+video_capture = cv2.VideoCapture(0) #Put path in bracket here	
+while video_capture.isOpened():
+    _, frame = video_capture.read() 
+    canvas = detect_object(frame)
+    cv2.imshow('Video', canvas) 
+    if cv2.waitKey(1) & 0xFF == ord('q'): # To stop the loop.
+        break 
+
+video_capture.release() # We turn the webcam/video off.
+cv2.destroyAllWindows() # We destroy all the windows inside which the images were displayed.
+"""
